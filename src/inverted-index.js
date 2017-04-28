@@ -1,6 +1,3 @@
-const valid = require('../fixtures/valid');
-const book2 = require('../fixtures/book2');
-
 /**
  * The Inverted Index class
  * @author Babatunde Adeyemi <tundewrites@gmail.com>
@@ -21,7 +18,7 @@ class InvertedIndex {
    * @param {object} jsonFile - the JSON file to be checked
    * @returns {boolean} - either true or false
    */
-  isValid(jsonFile) {
+  static isValid(jsonFile) {
     return Array.isArray(jsonFile) && !!jsonFile.length;
   }
 
@@ -30,7 +27,7 @@ class InvertedIndex {
    * @param {object} jsonFile - the JSON file to be checked
    * @returns {boolean} - either true or false
    */
-  isMalformed(jsonFile) {
+  static isMalformed(jsonFile) {
     let result = false;
     for (let i = 0; i < jsonFile.length; i += 1) {
       result = !('title' in jsonFile[i] && 'text' in jsonFile[i]);
@@ -44,7 +41,7 @@ class InvertedIndex {
    * @param {string} text - the string to be broken
    * @returns {set} - a set of unique tokens
    */
-  tokenize(text) {
+  static tokenize(text) {
     text = new Set(text.toLowerCase().split(' '));
     return Array.from(text);
   }
@@ -54,7 +51,7 @@ class InvertedIndex {
    * @param {array} jsonFile - array of book objects
    * @returns {string} - a string mashup of both title and text
    */
-  flattenContent(jsonFile) {
+  static flattenContent(jsonFile) {
     let flattenedContent = '';
     jsonFile.forEach((book) => {
       flattenedContent += `${book.title} ${book.text} `;
@@ -69,17 +66,16 @@ class InvertedIndex {
    * @returns {string} - returns a string
    */
   createIndex(fileName, fileContent) {
-    if (!this.isValid(fileContent)) return 'The uploaded file is invalid';
-
-    if (this.isMalformed(fileContent)) return 'The JSON file is malformed';
+    if (!InvertedIndex.isValid(fileContent)) return 'The uploaded file is invalid';
+    if (InvertedIndex.isMalformed(fileContent)) return 'The JSON file is malformed';
 
     const index = {};
-    const allContent = this.tokenize(this.flattenContent(fileContent));
+    const allContent = InvertedIndex.tokenize(InvertedIndex.flattenContent(fileContent));
     let eachContent;
 
     fileContent.forEach((book, i) => {
       eachContent = book;
-      eachContent = new Set(this.tokenize(`${eachContent.title} ${eachContent.text}`));
+      eachContent = new Set(InvertedIndex.tokenize(`${eachContent.title} ${eachContent.text}`));
 
       allContent.forEach((word) => {
         if (eachContent.has(word)) {
@@ -92,14 +88,45 @@ class InvertedIndex {
     return JSON.stringify(index);
   }
 
+  /**
+   * Searches the already created index
+   * @param {string} fileName - name of the file to be searched
+   * @param {string|array} terms - search terms
+   * @returns {object} - contains the location of each terms
+   */
+  searchIndex(fileName = 'all', ...terms) {
+    const indices = this.indices;
+    const searchTerms = [];
+    const result = {};
+
+    terms.forEach((term) => {
+      if (Array.isArray(term)) searchTerms.push(...term);
+      if (typeof term === 'string') searchTerms.push(...term.split(' '));
+    });
+
+    /**
+     * Creates a property in result for each book
+     * Initializes it to an empty object
+     */
+    Object.keys(indices).forEach((index) => {
+      result[index] = {};
+    });
+
+    Object.keys(indices).forEach((index) => {
+      searchTerms.forEach((word) => {
+        if (word in indices[index]) {
+          result[index][word] = indices[index][word];
+        } else {
+          result[index][word] = [];
+        }
+      });
+    });
+
+    if (fileName === 'all') {
+      return result;
+    }
+    return result[fileName];
+  }
 }
-
-const iIndex = new InvertedIndex();
-
-iIndex.createIndex('book1.json', valid);
-iIndex.createIndex('book2.json', book2);
-// console.log(iIndex.searchIndex('index', 'book1.json', 'wire tiger'));
-
-console.log(iIndex.indices);
 
 module.exports = InvertedIndex;
