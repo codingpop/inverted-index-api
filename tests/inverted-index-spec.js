@@ -1,5 +1,6 @@
 const InvertedIndex = require('../src/inverted-index');
 const valid = require('../fixtures/valid');
+const book1 = require('../fixtures/book1');
 const malformed = require('../fixtures/malformed');
 const bad = require('../fixtures/bad');
 const empty = require('../fixtures/empty');
@@ -37,8 +38,17 @@ describe('Inverted Index tests', () => {
     const validTokens2 = Array.from(new Set(text2.toLowerCase().split(' ')));
 
     it('should return an array of unique tokens', () => {
+      expect(testInvertedIndex.tokenize(text1)).toBeTruthy();
       expect(testInvertedIndex.tokenize(text1)).toEqual(validTokens1);
       expect(testInvertedIndex.tokenize(text2)).toEqual(validTokens2);
+    });
+  });
+
+  describe('Checks if a JSON file content is properly flatened', () => {
+    const expected = 'Hey You We are here On Programming He laughs';
+
+    it('should return a string of all titles and texts in a JSON file', () => {
+      expect(testInvertedIndex.flattenContent(book1)).toBe(expected);
     });
   });
 });
