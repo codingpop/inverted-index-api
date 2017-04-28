@@ -11,6 +11,7 @@ class InvertedIndex {
    */
   constructor() {
     this.indices = {};
+    this.indexedFiles = [];
   }
 
   /**
@@ -56,14 +57,14 @@ class InvertedIndex {
     jsonFile.forEach((book) => {
       flattenedContent += `${book.title} ${book.text} `;
     });
-    return flattenedContent.trim();
+    return flattenedContent.trim().toLowerCase();
   }
 
   /**
    * Reads the file and creates an index of the words in it
    * @param {string} fileName - the name of the book to be indexed
-   * @param {string} fileContent - the content of the file
-   * @returns {string|object} - returns an object or a string
+   * @param {string} fileContent - the content of the file (JSON array)
+   * @returns {string} - returns a string
    */
   createIndex(fileName, fileContent) {
     if (!this.isValid(fileContent)) {
@@ -74,11 +75,28 @@ class InvertedIndex {
       return 'The JSON file is malformed';
     }
 
+    const index = {};
+    let content1 = fileContent[0];
+    let content2 = fileContent[1];
+    const allContent = this.tokenize(this.flattenContent(fileContent));
 
-  }
+    content1 = new Set(this.tokenize(`${content1.title} ${content1.text}`));
+    content2 = new Set(this.tokenize(`${content2.title} ${content2.text}`));
 
-  searchIndex() {
-    
+    allContent.forEach((word) => {
+      if (content1.has(word) && content2.has(word)) {
+        index[word] = [0, 1];
+      }
+
+      if (content1.has(word) && !content2.has(word)) {
+        index[word] = [0];
+      }
+
+      if (content2.has(word) && !content1.has(word)) {
+        index[word] = [1];
+      }
+    });
+    this.indices[fileName] = index;
   }
 }
 
