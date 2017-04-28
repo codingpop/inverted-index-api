@@ -33,12 +33,12 @@ describe('Inverted Index tests', () => {
     const text1 = valid[0].text;
     const text2 = valid[1].text;
 
-    const validTokens1 = Array.from(text1.toLowerCase().split(' '));
-    const validTokens2 = Array.from(text2.toLowerCase().split(' '));
+    const validTokens1 = Array.from(new Set(text1.toLowerCase().split(' ')));
+    const validTokens2 = Array.from(new Set(text2.toLowerCase().split(' ')));
 
     it('should return an array of unique tokens', () => {
-      expect(testInvertedIndex.tokenize(text1)).toContain(validTokens1);
-      expect(testInvertedIndex.tokenize(text2)).toContain(validTokens2);
+      expect(testInvertedIndex.tokenize(text1)).toEqual(validTokens1);
+      expect(testInvertedIndex.tokenize(text2)).toEqual(validTokens2);
     });
   });
 });
