@@ -17,7 +17,7 @@ class InvertedIndex {
   }
 
   tokenize(text) {
-    text = new Set(text.toLower().split(' '));
+    text = new Set(text.toLowerCase().split(' '));
     return Array.from(text);
   }
 
