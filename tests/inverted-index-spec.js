@@ -1,9 +1,11 @@
 const InvertedIndex = require('../src/inverted-index');
 const valid = require('../fixtures/valid');
 const book1 = require('../fixtures/book1');
+const book2 = require('../fixtures/book2');
 const malformed = require('../fixtures/malformed');
 const bad = require('../fixtures/bad');
 const empty = require('../fixtures/empty');
+const book2Index = JSON.stringify(require('../fixtures/validIndex'));
 
 const testInvertedIndex = new InvertedIndex();
 
@@ -45,10 +47,16 @@ describe('Inverted Index tests', () => {
   });
 
   describe('Checks if a JSON file content is properly flattened', () => {
-    const expected = 'Hey You We are here On Programming He laughs';
+    const expected = 'hey you we are here on programming he laughs';
 
     it('should return a string of all titles and texts in a JSON file', () => {
       expect(testInvertedIndex.flattenContent(book1)).toBe(expected);
+    });
+  });
+
+  describe('Checks if index is properly created', () => {
+    it('should return a valid index', () => {
+      expect(testInvertedIndex.createIndex('book2.json', book2)).toEqual(book2Index);
     });
   });
 });
