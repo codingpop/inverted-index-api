@@ -1,3 +1,6 @@
+const valid = require('../fixtures/valid');
+const book2 = require('../fixtures/book2');
+
 /**
  * The Inverted Index class
  * @author Babatunde Adeyemi <tundewrites@gmail.com>
@@ -11,7 +14,6 @@ class InvertedIndex {
    */
   constructor() {
     this.indices = {};
-    this.indexedFiles = new Set();
   }
 
   /**
@@ -67,51 +69,37 @@ class InvertedIndex {
    * @returns {string} - returns a string
    */
   createIndex(fileName, fileContent) {
-    if (!this.isValid(fileContent)) {
-      return 'The uploaded file is invalid';
-    }
+    if (!this.isValid(fileContent)) return 'The uploaded file is invalid';
 
-    if (this.isMalformed(fileContent)) {
-      return 'The JSON file is malformed';
-    }
+    if (this.isMalformed(fileContent)) return 'The JSON file is malformed';
 
     const index = {};
-    let content1 = fileContent[0];
-    let content2 = fileContent[1];
     const allContent = this.tokenize(this.flattenContent(fileContent));
+    let eachContent;
 
-    content1 = new Set(this.tokenize(`${content1.title} ${content1.text}`));
-    content2 = new Set(this.tokenize(`${content2.title} ${content2.text}`));
+    fileContent.forEach((book, i) => {
+      eachContent = book;
+      eachContent = new Set(this.tokenize(`${eachContent.title} ${eachContent.text}`));
 
-    allContent.forEach((word) => {
-      if (content1.has(word) && content2.has(word)) {
-        index[word] = [0, 1];
-      }
-
-      if (content1.has(word) && !content2.has(word)) {
-        index[word] = [0];
-      }
-
-      if (content2.has(word) && !content1.has(word)) {
-        index[word] = [1];
-      }
+      allContent.forEach((word) => {
+        if (eachContent.has(word)) {
+          if (word in index) index[word].push(i);
+          else index[word] = [i];
+        }
+      });
     });
     this.indices[fileName] = index;
-    this.indexedFiles.add(`${fileName}.json`);
     return JSON.stringify(index);
   }
 
-  searchIndex(index, fileName = 'all', ...terms) {
-    const searchTerms = [];
-
-    terms.forEach((term) => {
-      if (Array.isArray(term)) {
-        searchTerms.push(...term);
-      } else {
-        searchTerms.push(term);
-      }
-    });
-  }
 }
+
+const iIndex = new InvertedIndex();
+
+iIndex.createIndex('book1.json', valid);
+iIndex.createIndex('book2.json', book2);
+// console.log(iIndex.searchIndex('index', 'book1.json', 'wire tiger'));
+
+console.log(iIndex.indices);
 
 module.exports = InvertedIndex;
