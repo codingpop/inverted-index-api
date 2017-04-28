@@ -36,7 +36,7 @@ describe('Inverted Index tests', () => {
     const validTokens1 = Array.from(text1.toLowerCase().split(' '));
     const validTokens2 = Array.from(text2.toLowerCase().split(' '));
 
-    it('should return `true` if the tokens come in an array', () => {
+    it('should return an array of unique tokens', () => {
       expect(testInvertedIndex.tokenize(text1)).toContain(validTokens1);
       expect(testInvertedIndex.tokenize(text2)).toContain(validTokens2);
     });
