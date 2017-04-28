@@ -11,7 +11,7 @@ class InvertedIndex {
    */
   constructor() {
     this.indices = {};
-    this.indexedFiles = [];
+    this.indexedFiles = new Set();
   }
 
   /**
@@ -97,6 +97,20 @@ class InvertedIndex {
       }
     });
     this.indices[fileName] = index;
+    this.indexedFiles.add(`${fileName}.json`);
+    return JSON.stringify(index);
+  }
+
+  searchIndex(index, fileName = 'all', ...terms) {
+    const searchTerms = [];
+
+    terms.forEach((term) => {
+      if (Array.isArray(term)) {
+        searchTerms.push(...term);
+      } else {
+        searchTerms.push(term);
+      }
+    });
   }
 }
 
