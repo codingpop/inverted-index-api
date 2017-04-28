@@ -44,7 +44,7 @@ describe('Inverted Index tests', () => {
     });
   });
 
-  describe('Checks if a JSON file content is properly flatened', () => {
+  describe('Checks if a JSON file content is properly flattened', () => {
     const expected = 'Hey You We are here On Programming He laughs';
 
     it('should return a string of all titles and texts in a JSON file', () => {
