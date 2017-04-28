@@ -1,0 +1,10 @@
+[
+  {
+    "title": "malformed book",
+    "content": "this book is actually malformed!"
+  },
+  {
+    "name": "blah blah",
+    "body": "blah blah blah"
+  }
+]
