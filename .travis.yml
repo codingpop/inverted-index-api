@@ -1,0 +1,8 @@
+language: node_js
+node_js:
+    - 4
+script: gulp
+before_script:
+    - npm install -g istanbul
+after_success:
+    - gulp coverage coveralls
