@@ -11,7 +11,7 @@ gulp.src(['src/inverted-index.js', 'tests/inverted-index-test.js'])
 .pipe((babel())).pipe(gulp.dest('dist')));
 
 gulp.task('run-tests', ['default'], () =>
-gulp.src(['tests/inverted-index-test.js'])
+gulp.src('tests/inverted-index-test.js')
 .pipe(jasmineNode())
 );
 
