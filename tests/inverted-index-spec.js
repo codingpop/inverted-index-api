@@ -1,4 +1,4 @@
-import InvertedIndex from '../inverted-index';
+import InvertedIndex from '../src/inverted-index';
 import valid from '../fixtures/valid.json';
 import book1 from '../fixtures/book1.json';
 import book2 from '../fixtures/book2.json';
