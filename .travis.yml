@@ -1,7 +1,7 @@
 language: node_js
 node_js:
     - "6"
-script: "gulp run-test"
+script: "gulp run-tests"
 before_script:
     - npm install -g istanbul
 after_success:
