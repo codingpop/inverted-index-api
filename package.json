@@ -35,7 +35,9 @@
     "eslint-plugin-react": "^6.9.0"
   },
   "scripts": {
-    "test": "gulp coverage"
+    "test": "gulp run-tests",
+    "dev": "gulp coveralls",
+    "coveralls": "cat ./coverage/lcov.info | coveralls"
   },
   "repository": {
     "type": "git",
