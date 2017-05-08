@@ -7,11 +7,14 @@
     "test": "tests"
   },
   "dependencies": {
+    "babel-cli": "^6.24.1",
+    "babel-register": "^6.24.1",
     "body-parser": "^1.17.1",
     "dotenv": "^4.0.0",
     "eslint": "^3.19.0",
     "express": "^4.15.2",
     "gulp": "^3.9.1",
+    "gulp-babel": "^6.1.2",
     "gulp-babel-istanbul": "^1.6.0",
     "gulp-coverage": "^0.3.38",
     "gulp-coveralls": "^0.1.4",
@@ -19,7 +22,8 @@
     "gulp-inject-modules": "^1.0.0",
     "gulp-istanbul-report": "0.0.1",
     "gulp-jasmine-node": "^1.0.7",
-    "gulp-nodemon": "^2.2.1"
+    "gulp-nodemon": "^2.2.1",
+    "jasmine-node": "^1.14.5"
   },
   "devDependencies": {
     "eslint": "^3.19.0",
@@ -34,7 +38,7 @@
     "supertest": "^3.0.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node_modules/.bin/babel-node node_modules/.bin/jasmine-node tests/inverted-index-spec.js"
   },
   "repository": {
     "type": "git",
