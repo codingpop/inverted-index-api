@@ -66,16 +66,22 @@ class InvertedIndex {
    * @returns {string} - returns a string
    */
   createIndex(fileName, fileContent) {
-    if (!InvertedIndex.isValid(fileContent)) return 'The uploaded file is invalid';
-    if (InvertedIndex.isMalformed(fileContent)) return 'The JSON file is malformed';
+    if (!InvertedIndex.isValid(fileContent)) {
+      return 'The uploaded file is invalid';
+    }
+    if (InvertedIndex.isMalformed(fileContent)) {
+      return 'The JSON file is malformed';
+    }
 
     const index = {};
-    const allContent = InvertedIndex.tokenize(InvertedIndex.flattenContent(fileContent));
+    const allContent = InvertedIndex
+    .tokenize(InvertedIndex.flattenContent(fileContent));
     let eachContent;
 
     fileContent.forEach((book, i) => {
       eachContent = book;
-      eachContent = new Set(InvertedIndex.tokenize(`${eachContent.title} ${eachContent.text}`));
+      eachContent = new Set(InvertedIndex
+      .tokenize(`${eachContent.title} ${eachContent.text}`));
 
       allContent.forEach((word) => {
         if (eachContent.has(word)) {
@@ -129,4 +135,4 @@ class InvertedIndex {
   }
 }
 
-module.exports = InvertedIndex;
+export default InvertedIndex;
