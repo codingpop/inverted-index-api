@@ -56,7 +56,7 @@ class InvertedIndex {
     jsonFile.forEach((book) => {
       flattenedContent += `${book.title} ${book.text} `;
     });
-    return flattenedContent.trim().toLowerCase();
+    return flattenedContent.trim();
   }
 
   /**

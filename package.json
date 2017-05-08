@@ -35,7 +35,7 @@
     "eslint-plugin-react": "^6.9.0"
   },
   "scripts": {
-    "test": "node_modules/.bin/babel-node ./node_modules/istanbul/lib/cli cover node_modules/.bin/jasmine-node  tests/**.js"
+    "test": "gulp run-tests"
   },
   "repository": {
     "type": "git",

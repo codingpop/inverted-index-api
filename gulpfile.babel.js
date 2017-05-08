@@ -13,6 +13,7 @@ gulp.src(['src/inverted-index.js', 'tests/inverted-index-test.js'])
 gulp.task('run-tests', ['default'], () =>
 gulp.src('tests/inverted-index-test.js')
 .pipe(jasmineNode())
+.pipe(exit())
 );
 
 gulp.task('coverage', () => {
@@ -29,7 +30,6 @@ gulp.task('coverage', () => {
       .on('end', () => {
         gulp.src('coverage/lcov.info')
         .pipe(coveralls());
-      })
-      .pipe(exit());
+      });
     });
 });
