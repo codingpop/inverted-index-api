@@ -9,12 +9,12 @@ gulp.task('default', () =>
 gulp.src(['src/inverted-index.js', 'tests/inverted-index-test.js'])
 .pipe((babel())).pipe(gulp.dest('dist')));
 
-gulp.task('test', ['default'], () =>
+gulp.task('run-tests', ['default'], () =>
 gulp.src(['tests/inverted-index-test.js'])
 .pipe(jasmineNode())
 );
 
-gulp.task('coverage', (cb) => {
+gulp.task('test', (cb) => {
   gulp.src('src/inverted-index.js')
     .pipe(istanbul())
     .pipe(istanbul.hookRequire())
