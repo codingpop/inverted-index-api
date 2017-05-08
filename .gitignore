@@ -3,3 +3,4 @@
 .vscode
 .env
 .eslintrc
+.coveralls.yml
