@@ -15,21 +15,6 @@ gulp.src(['tests/inverted-index-test.js'])
 .pipe(jasmineNode())
 );
 
-gulp.task('test', (cb) => {
-  gulp.src('src/*.js')
-    .pipe(istanbul())
-    .pipe(istanbul.hookRequire())
-    .on('finish', () => {
-      gulp.src('tests/*.js')
-      .pipe(babel())
-      .pipe(injectModules())
-      .pipe(jasmineNode())
-      .pipe(istanbul.writeReports())
-      .pipe(istanbul.enforceThresholds({ thresholds: { global: 70 } }))
-      .on('end', cb);
-    });
-});
-
 gulp.task('coverage', () => {
   gulp.src('src/*.js')
     .pipe(istanbul())
