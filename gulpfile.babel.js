@@ -29,6 +29,7 @@ gulp.task('coverage', () => {
       .on('end', () => {
         gulp.src('coverage/lcov.info')
         .pipe(coveralls());
-      });
+      })
+      .pipe(exit());
     });
 });
