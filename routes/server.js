@@ -13,33 +13,44 @@ const upload = multer({ dest: 'fixtures/uploads' });
 const port = process.env.PORT;
 const app = express();
 
-app.post('/api/create', upload.array('jsonfile'), (req, res) => {
+app.post('/api/create', upload.array('file'), (req, res) => {
   const books = req.files;
   let content;
   let fileName;
-  const indexed = [];
 
-  const bookNum = books.length;
-  books.forEach((book, index) => {
-    fileSystem.readFile(book.path, 'utf8', (err, data) => {
-      if (err) {
-        res.send(err.message);
-      } else {
-        fileName = book.originalname;
-        try {
-          content = JSON.parse(data);
-          runApp.createIndex(fileName, content);
-          indexed.push(fileName);
-          if (index === bookNum - 1) {
-            res.status(200).json(runApp.indices);
+  const populateIndex = () => {
+    return new Promise((resolve, reject) => {
+      books.forEach((book) => {
+        fileSystem.readFile(book.path, 'utf8', (err, data) => {
+          if (err) {
+            res.send(err.message);
+          } else {
+            fileName = book.originalname;
+            try {
+              content = JSON.parse(data);
+              runApp.createIndex(fileName, content);
+              resolve('Success!');
+            } catch (err) {
+              if (err instanceof SyntaxError) {
+                reject('Not a JSON file!');
+              } else if (err) {
+                reject(err.message);
+              }
+            }
           }
-        } catch (err) {
-          if (err instanceof SyntaxError) {
-            res.send('Not a JSON file');
-          }
-        }
-      }
+        });
+      });
     });
+  };
+
+  populateIndex().then(() => {
+    if (req.files.length === 1) {
+      res.status(200).json(runApp.indices[fileName]);
+    } else {
+      res.status(200).json(runApp.indices);
+    }
+  }).catch((fromReject) => {
+    res.status(400).send(fromReject);
   });
 });
 

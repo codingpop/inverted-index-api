@@ -1,6 +1,3 @@
-// const valid = require('../fixtures/valid');
-// const book1 = require('../fixtures/book1');
-
 /**
  * The Inverted Index class
  * @author Babatunde Adeyemi <tundewrites@gmail.com>
@@ -54,45 +51,42 @@ class InvertedIndex {
   }
 
   /**
-   * Reads the file and creates an index of the words in it
+   * Reads the file and and verify if it's valid
+   * Then creates an index of the words in it
    * @param {string} fileName - the name of the book to be indexed
    * @param {string} fileContent - the content of the JSON array
    * @returns {string} - returns a string
    */
   createIndex(fileName, fileContent) {
     if (!fileName || fileContent === undefined) {
-      return 'Improper arguments';
+      throw new Error('Improper arguments');
     }
 
     if (!Array.isArray(fileContent)) {
-      return 'Not JSON array';
+      throw new Error('Not JSON array');
     }
 
     if (typeof fileName !== 'string') {
-      return 'Improper file name';
+      throw new Error('Improper file name');
     }
 
     if (!fileContent.length) {
-      return 'Empty JSON array';
+      throw new Error('Empty JSON array');
     }
 
-    try {
-      if (InvertedIndex.isMalformed(fileContent)) {
-        return 'Malformed file';
-      }
-    } catch (TypeError) {
-      return 'Malformed file';
+    if (InvertedIndex.isMalformed(fileContent)) {
+      throw new Error('Malformed file');
     }
 
     const index = {};
     const allContent = InvertedIndex
-    .tokenize(InvertedIndex.flattenContent(fileContent));
+      .tokenize(InvertedIndex.flattenContent(fileContent));
     let eachContent;
 
     fileContent.forEach((book, location) => {
       eachContent = book;
       eachContent = new Set(InvertedIndex
-      .tokenize(`${eachContent.title} ${eachContent.text}`));
+        .tokenize(`${eachContent.title} ${eachContent.text}`));
 
       allContent.forEach((word) => {
         if (eachContent.has(word)) {
@@ -158,12 +152,4 @@ class InvertedIndex {
   }
 }
 
-
-// const test = new InvertedIndex();
-
-// console.log(test.createIndex('valid.json', valid));
-// console.log(test.createIndex('book1.json', book1));
-
-// console.log(test.searchIndex('valid.json', 'laughs'));
-// console.log(test.indices);
 export default InvertedIndex;
