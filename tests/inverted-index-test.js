@@ -5,20 +5,35 @@ import book2 from '../fixtures/book2.json';
 import malformed from '../fixtures/malformed.json';
 import bad from '../fixtures/bad.json';
 import empty from '../fixtures/empty.json';
-// import book2Index from '../fixtures/book2Index.json';
+import searchValid from '../fixtures/search-valid.json';
+import searchAll from '../fixtures/search-all.json';
 
 const testInvertedIndex = new InvertedIndex();
 
 describe('Inverted Index tests', () => {
-  describe('Checks if file is valid', () => {
-    it('should return `true` for a valid JSON file', () => {
-      expect(InvertedIndex.isValid(valid)).toBe(true);
-      expect(InvertedIndex.isValid(malformed)).toBe(true);
+  describe('Checks if create index is properly called', () => {
+    it('should return `Improper arguments`', () => {
+      expect(testInvertedIndex.createIndex()).toBe('Improper arguments');
+      expect(testInvertedIndex.createIndex(valid)).toBe('Improper arguments');
     });
 
-    it('should return `false` for an invalid JSON file', () => {
-      expect(InvertedIndex.isValid(empty)).toBe(false);
-      expect(InvertedIndex.isValid(bad)).toBe(false);
+    it('should return `Empty JSON array`', () => {
+      expect(testInvertedIndex.createIndex('string', [])).toBe('Empty JSON array');
+    });
+
+    it('should return `Not JSON array`', () => {
+      expect(testInvertedIndex.createIndex('string', 3)).toBe('Not JSON array');
+      expect(testInvertedIndex.createIndex('string', {})).toBe('Not JSON array');
+    });
+
+    it('should return `Improper file name`', () => {
+      expect(testInvertedIndex.createIndex([], [])).toBe('Improper file name');
+    });
+
+    it('should return `Malformed file`', () => {
+      expect(testInvertedIndex.createIndex('string', ['title'])).toBe('Malformed file');
+      expect(testInvertedIndex.createIndex('string', malformed)).toBe('Malformed file');
+      expect(testInvertedIndex.createIndex('string', bad)).toBe('Malformed file');
     });
   });
 
@@ -36,33 +51,75 @@ describe('Inverted Index tests', () => {
     const text1 = valid[0].text;
     const text2 = valid[1].text;
 
-    const validTokens1 = Array.from(new Set(text1.toLowerCase().split(' ')));
-    const validTokens2 = Array.from(new Set(text2.toLowerCase().split(' ')));
+    const validTokens1 = Array
+      .from(new Set(text1.toLowerCase().split(' ')));
+    const validTokens2 = Array
+      .from(new Set(text2.toLowerCase().split(' ')));
 
     it('should return an array of unique tokens', () => {
-      expect(InvertedIndex.tokenize(text1)).toBeTruthy();
-      expect(InvertedIndex.tokenize(text1)).toEqual(validTokens1);
-      expect(InvertedIndex.tokenize(text2)).toEqual(validTokens2);
+      expect(InvertedIndex.tokenize(text1))
+        .toBeTruthy();
+      expect(InvertedIndex.tokenize(text1))
+        .toEqual(validTokens1);
+      expect(InvertedIndex.tokenize(text2))
+        .toEqual(validTokens2);
     });
   });
 
   describe('Checks if a JSON file content is properly flattened', () => {
-    const expected = 'hey you we are here on programming he laughs';
+    const expected = 'Coding is fun Yes we all love coding ' +
+      'and laughs What is love He hates what love is';
 
-    it('should return a string of all titles and texts in a JSON file', () => {
-      expect(InvertedIndex.flattenContent(book1)).toBe(expected);
+    it('should return a string of all titles and texts', () => {
+      expect(InvertedIndex.flattenContent(book1))
+        .toBe(expected);
     });
   });
 
-  // describe('Checks if index is properly created', () => {
-  //   it('should return a valid index', () => {
-  //     expect(testInvertedIndex.createIndex('book2.json', book2)).toEqual(book2Index);
-  //   });
-  // });
+  describe('Checks if the searchIndex returns valid results', () => {
+    testInvertedIndex.createIndex('valid.json', valid);
+    testInvertedIndex.createIndex('book1.json', book1);
 
-  describe('Checks if the search index returns the appropriate results', () => {
-    it('should return a valid search result', () => {
-      expect(testInvertedIndex.searchIndex('indices', 'book1.json', ['crazy', 'tiger'])).toBe();
+    const indices = testInvertedIndex.indices;
+    it('should return a valid result for one file', () => {
+      expect(InvertedIndex
+        .searchIndex(indices, 'valid.json', 'laughs'))
+        .toEqual(searchValid);
+    });
+
+    it('should return a valid result for all files', () => {
+      expect(InvertedIndex
+        .searchIndex(indices, 'laughs'))
+        .toEqual(searchAll);
+    });
+
+    it('should return a valid result for all files', () => {
+      expect(InvertedIndex
+        .searchIndex(indices, ['laughs']))
+        .toEqual(searchAll);
+    });
+
+    it('should return `try not in index`', () => {
+      expect(InvertedIndex
+        .searchIndex(indices, 'try.json', 'laughs'))
+        .toBe('try.json not in index');
+    });
+
+    it('should return `{meh: []}`', () => {
+      expect(InvertedIndex
+        .searchIndex(indices, 'valid.json', 'meh'))
+        .toEqual({ meh: [] });
+    });
+
+    const expected = {
+      'valid.json': { meh: [] },
+      'book1.json': { meh: [] }
+    };
+
+    it('should return appropriate result', () => {
+      expect(InvertedIndex
+        .searchIndex(indices, 'meh'))
+        .toEqual(expected);
     });
   });
 });

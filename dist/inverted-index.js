@@ -10,6 +10,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+// const valid = require('../fixtures/valid');
+// const book1 = require('../fixtures/book1');
+
 /**
  * The Inverted Index class
  * @author Babatunde Adeyemi <tundewrites@gmail.com>
@@ -28,7 +31,7 @@ var InvertedIndex = function () {
   }
 
   /**
-   * Checks for valid JSON file
+   * Checks for malformed JSON file
    * @param {object} jsonFile - the JSON file to be checked
    * @returns {boolean} - either true or false
    */
@@ -41,28 +44,45 @@ var InvertedIndex = function () {
     /**
      * Reads the file and creates an index of the words in it
      * @param {string} fileName - the name of the book to be indexed
-     * @param {string} fileContent - the content of the file (JSON array)
+     * @param {string} fileContent - the content of the JSON array
      * @returns {string} - returns a string
      */
     value: function createIndex(fileName, fileContent) {
-      if (!InvertedIndex.isValid(fileContent)) {
-        return 'The uploaded file is invalid';
+      if (!fileName || fileContent === undefined) {
+        return 'Improper arguments';
       }
-      if (InvertedIndex.isMalformed(fileContent)) {
-        return 'The JSON file is malformed';
+
+      if (!Array.isArray(fileContent)) {
+        return 'Not JSON array';
+      }
+
+      if (typeof fileName !== 'string') {
+        return 'Improper file name';
+      }
+
+      if (!fileContent.length) {
+        return 'Empty JSON array';
+      }
+
+      try {
+        if (InvertedIndex.isMalformed(fileContent)) {
+          return 'Malformed file';
+        }
+      } catch (TypeError) {
+        return 'Malformed file';
       }
 
       var index = {};
       var allContent = InvertedIndex.tokenize(InvertedIndex.flattenContent(fileContent));
       var eachContent = void 0;
 
-      fileContent.forEach(function (book, i) {
+      fileContent.forEach(function (book, location) {
         eachContent = book;
         eachContent = new Set(InvertedIndex.tokenize(eachContent.title + ' ' + eachContent.text));
 
         allContent.forEach(function (word) {
           if (eachContent.has(word)) {
-            if (word in index) index[word].push(i);else index[word] = [i];
+            if (word in index) index[word].push(location);else index[word] = [location];
           }
         });
       });
@@ -72,65 +92,13 @@ var InvertedIndex = function () {
 
     /**
      * Searches the already created index
+     * @param {object} indices - indices to be search
      * @param {string} fileName - name of the file to be searched
      * @param {string|array} terms - search terms
      * @returns {object} - contains the location of each terms
      */
 
-  }, {
-    key: 'searchIndex',
-    value: function searchIndex() {
-      var fileName = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'all';
-
-      var indices = this.indices;
-      var searchTerms = [];
-      var result = {};
-
-      for (var _len = arguments.length, terms = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-        terms[_key - 1] = arguments[_key];
-      }
-
-      terms.forEach(function (term) {
-        if (Array.isArray(term)) searchTerms.push.apply(searchTerms, _toConsumableArray(term));
-        if (typeof term === 'string') searchTerms.push.apply(searchTerms, _toConsumableArray(term.split(' ')));
-      });
-
-      /**
-       * Creates a property in result for each book
-       * Initializes it to an empty object
-       */
-      Object.keys(indices).forEach(function (index) {
-        result[index] = {};
-      });
-
-      Object.keys(indices).forEach(function (index) {
-        searchTerms.forEach(function (word) {
-          if (word in indices[index]) {
-            result[index][word] = indices[index][word];
-          } else {
-            result[index][word] = [];
-          }
-        });
-      });
-
-      if (fileName === 'all') {
-        return result;
-      }
-      return result[fileName];
-    }
   }], [{
-    key: 'isValid',
-    value: function isValid(jsonFile) {
-      return Array.isArray(jsonFile) && !!jsonFile.length;
-    }
-
-    /**
-     * Checks for malformed JSON file
-     * @param {object} jsonFile - the JSON file to be checked
-     * @returns {boolean} - either true or false
-     */
-
-  }, {
     key: 'isMalformed',
     value: function isMalformed(jsonFile) {
       var result = false;
@@ -167,11 +135,70 @@ var InvertedIndex = function () {
       jsonFile.forEach(function (book) {
         flattenedContent += book.title + ' ' + book.text + ' ';
       });
-      return flattenedContent.trim().toLowerCase();
+      return flattenedContent.trim();
+    }
+  }, {
+    key: 'searchIndex',
+    value: function searchIndex(indices) {
+      var searchTerms = [];
+      var result = {};
+      var keys = Object.keys(indices);
+
+      for (var _len = arguments.length, terms = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        terms[_key - 1] = arguments[_key];
+      }
+
+      terms.forEach(function (term) {
+        if (Array.isArray(term)) {
+          searchTerms.push.apply(searchTerms, _toConsumableArray(term));
+        }
+        if (typeof term === 'string') {
+          searchTerms.push.apply(searchTerms, _toConsumableArray(term.split(' ')));
+        }
+      });
+
+      keys(indices).forEach(function (index) {
+        result[index] = {};
+      });
+
+      keys(indices).forEach(function (index) {
+        searchTerms.forEach(function (word) {
+          if (word in indices[index]) {
+            result[index][word] = indices[index][word];
+          } else {
+            result[index][word] = [];
+          }
+        });
+      });
+
+      var fileName = void 0;
+      if (searchTerms[0].endsWith('.json')) {
+        fileName = searchTerms.shift();
+      } else {
+        fileName = 'all';
+      }
+
+      if (!(fileName in indices) && fileName !== 'all') {
+        return fileName + ' not in index';
+      }
+
+      if (fileName === 'all') {
+        return result;
+      }
+      return result[fileName];
     }
   }]);
 
   return InvertedIndex;
 }();
+
+// const test = new InvertedIndex();
+
+// console.log(test.createIndex('valid.json', valid));
+// console.log(test.createIndex('book1.json', book1));
+
+// console.log(test.searchIndex('valid.json', 'laughs'));
+// console.log(test.indices);
+
 
 exports.default = InvertedIndex;
