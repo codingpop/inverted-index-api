@@ -3,3 +3,6 @@
 .vscode
 .env
 .eslintrc
+.coveralls.yml
+/coverage
+/fixtures/uploads
