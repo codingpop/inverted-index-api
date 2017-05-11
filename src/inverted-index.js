@@ -34,7 +34,7 @@ class InvertedIndex {
    */
   static tokenize(text) {
     text = new Set(text.toLowerCase().match(/\w+/g));
-    return Array.from(text);
+    return Array.from(text).sort();
   }
 
   /**
