@@ -1,49 +1,79 @@
 import InvertedIndex from '../src/inverted-index';
 import valid from '../fixtures/valid.json';
 import book1 from '../fixtures/book1.json';
-import book2 from '../fixtures/book2.json';
 import malformed from '../fixtures/malformed.json';
 import bad from '../fixtures/bad.json';
-import empty from '../fixtures/empty.json';
 import searchValid from '../fixtures/search-valid.json';
 import searchAll from '../fixtures/search-all.json';
 
 const testInvertedIndex = new InvertedIndex();
 
 describe('Inverted Index tests', () => {
-  describe('Checks if create index is properly called', () => {
-    it('should return `Improper arguments`', () => {
-      expect(testInvertedIndex.createIndex()).toBe('Improper arguments');
-      expect(testInvertedIndex.createIndex(valid)).toBe('Improper arguments');
+  describe('Is createIndex() properly called?', () => {
+    it('should throw `Improper arguments`', () => {
+      expect(() => { testInvertedIndex.createIndex(); })
+        .toThrow('Improper arguments');
+      expect(() => { testInvertedIndex.createIndex(valid); })
+        .toThrow('Improper arguments');
     });
 
-    it('should return `Empty JSON array`', () => {
-      expect(testInvertedIndex.createIndex('string', [])).toBe('Empty JSON array');
+    it('should throw `Empty JSON array`', () => {
+      expect(() => {
+        testInvertedIndex
+          .createIndex('string', []);
+      })
+        .toThrow('Empty JSON array');
     });
 
-    it('should return `Not JSON array`', () => {
-      expect(testInvertedIndex.createIndex('string', 3)).toBe('Not JSON array');
-      expect(testInvertedIndex.createIndex('string', {})).toBe('Not JSON array');
+    it('should throw `Not JSON array`', () => {
+      expect(() => {
+        testInvertedIndex
+          .createIndex('string', 3);
+      })
+        .toThrow('Not JSON array');
+      expect(() => {
+        testInvertedIndex
+          .createIndex('string', {});
+      })
+        .toThrow('Not JSON array');
     });
 
-    it('should return `Improper file name`', () => {
-      expect(testInvertedIndex.createIndex([], [])).toBe('Improper file name');
+    it('should throw `Improper file name`', () => {
+      expect(() => {
+        testInvertedIndex
+          .createIndex([], []);
+      })
+        .toThrow('Improper file name');
     });
 
-    it('should return `Malformed file`', () => {
-      expect(testInvertedIndex.createIndex('string', ['title'])).toBe('Malformed file');
-      expect(testInvertedIndex.createIndex('string', malformed)).toBe('Malformed file');
-      expect(testInvertedIndex.createIndex('string', bad)).toBe('Malformed file');
+    it('should throw `Malformed file`', () => {
+      expect(() => {
+        testInvertedIndex
+          .createIndex('string', ['title']);
+      })
+        .toThrow('Malformed file');
+      expect(() => {
+        testInvertedIndex
+          .createIndex('string', malformed);
+      })
+        .toThrow('Malformed file');
+      expect(() => {
+        testInvertedIndex
+          .createIndex('string', bad);
+      })
+        .toThrow(Error('Malformed file'));
     });
   });
 
   describe('Checks if file is malformed', () => {
     it('should return `true` for malformed JSON file', () => {
-      expect(InvertedIndex.isMalformed(malformed)).toBe(true);
+      expect(InvertedIndex
+        .isMalformed(malformed)).toBe(true);
     });
 
     it('should return `false` for a valid JSON array', () => {
-      expect(InvertedIndex.isMalformed(valid)).toBe(false);
+      expect(InvertedIndex
+        .isMalformed(valid)).toBe(false);
     });
   });
 
@@ -66,7 +96,7 @@ describe('Inverted Index tests', () => {
     });
   });
 
-  describe('Checks if a JSON file content is properly flattened', () => {
+  describe('Is JSON content is properly flattened?', () => {
     const expected = 'Coding is fun Yes we all love coding ' +
       'and laughs What is love He hates what love is';
 

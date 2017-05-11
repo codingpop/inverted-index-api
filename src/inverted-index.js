@@ -30,10 +30,10 @@ class InvertedIndex {
   /**
    * Breaks a string of text into unique word tokens
    * @param {string} text - the string to be broken
-   * @returns {set} - a set of unique tokens
+   * @returns {array} - a set of unique tokens
    */
   static tokenize(text) {
-    text = new Set(text.toLowerCase().split(' '));
+    text = new Set(text.toLowerCase().match(/\w+/g));
     return Array.from(text);
   }
 
@@ -55,7 +55,7 @@ class InvertedIndex {
    * Then creates an index of the words in it
    * @param {string} fileName - the name of the book to be indexed
    * @param {string} fileContent - the content of the JSON array
-   * @returns {string} - returns a string
+   * @returns {object} - returns a string
    */
   createIndex(fileName, fileContent) {
     if (!fileName || fileContent === undefined) {
@@ -73,8 +73,11 @@ class InvertedIndex {
     if (!fileContent.length) {
       throw new Error('Empty JSON array');
     }
-
-    if (InvertedIndex.isMalformed(fileContent)) {
+    try {
+      if (InvertedIndex.isMalformed(fileContent)) {
+        throw new Error('Malformed file');
+      }
+    } catch (err) {
       throw new Error('Malformed file');
     }
 
@@ -107,7 +110,7 @@ class InvertedIndex {
    * @returns {object} - contains the location of each terms
    */
   static searchIndex(indices, ...terms) {
-    const searchTerms = [];
+    let searchTerms = [];
     const result = {};
     const keys = Object.keys(indices);
 
@@ -116,15 +119,23 @@ class InvertedIndex {
         searchTerms.push(...term);
       }
       if (typeof term === 'string') {
-        searchTerms.push(...term.split(' '));
+        searchTerms.push(...InvertedIndex.tokenize(term));
       }
     });
 
-    keys(indices).forEach((index) => {
+    keys.forEach((index) => {
       result[index] = {};
     });
 
-    keys(indices).forEach((index) => {
+    let fileName;
+    if (searchTerms[1] === 'json') {
+      fileName = `${searchTerms[0]}.json`;
+      searchTerms = searchTerms.slice(2);
+    } else {
+      fileName = 'all';
+    }
+
+    keys.forEach((index) => {
       searchTerms.forEach((word) => {
         if (word in indices[index]) {
           result[index][word] = indices[index][word];
@@ -133,13 +144,6 @@ class InvertedIndex {
         }
       });
     });
-
-    let fileName;
-    if (searchTerms[0].endsWith('.json')) {
-      fileName = searchTerms.shift();
-    } else {
-      fileName = 'all';
-    }
 
     if (!(fileName in indices) && fileName !== 'all') {
       return `${fileName} not in index`;
