@@ -14,15 +14,6 @@ class InvertedIndex {
   }
 
   /**
-   * Checks for valid JSON file
-   * @param {object} jsonFile - the JSON file to be checked
-   * @returns {boolean} - either true or false
-   */
-  static isValid(jsonFile) {
-    return Array.isArray(jsonFile) && !!jsonFile.length;
-  }
-
-  /**
    * Checks for malformed JSON file
    * @param {object} jsonFile - the JSON file to be checked
    * @returns {boolean} - either true or false
@@ -39,10 +30,10 @@ class InvertedIndex {
   /**
    * Breaks a string of text into unique word tokens
    * @param {string} text - the string to be broken
-   * @returns {set} - a set of unique tokens
+   * @returns {array} - a set of unique tokens
    */
   static tokenize(text) {
-    text = new Set(text.toLowerCase().split(' '));
+    text = new Set(text.toLowerCase().match(/\w+/g));
     return Array.from(text);
   }
 
@@ -56,31 +47,54 @@ class InvertedIndex {
     jsonFile.forEach((book) => {
       flattenedContent += `${book.title} ${book.text} `;
     });
-    return flattenedContent.trim().toLowerCase();
+    return flattenedContent.trim();
   }
 
   /**
-   * Reads the file and creates an index of the words in it
+   * Reads the file and and verify if it's valid
+   * Then creates an index of the words in it
    * @param {string} fileName - the name of the book to be indexed
-   * @param {string} fileContent - the content of the file (JSON array)
-   * @returns {string} - returns a string
+   * @param {string} fileContent - the content of the JSON array
+   * @returns {object} - returns a string
    */
   createIndex(fileName, fileContent) {
-    if (!InvertedIndex.isValid(fileContent)) return 'The uploaded file is invalid';
-    if (InvertedIndex.isMalformed(fileContent)) return 'The JSON file is malformed';
+    if (!fileName || fileContent === undefined) {
+      throw new Error('Improper arguments');
+    }
+
+    if (!Array.isArray(fileContent)) {
+      throw new Error('Not JSON array');
+    }
+
+    if (typeof fileName !== 'string') {
+      throw new Error('Improper file name');
+    }
+
+    if (!fileContent.length) {
+      throw new Error('Empty JSON array');
+    }
+    try {
+      if (InvertedIndex.isMalformed(fileContent)) {
+        throw new Error('Malformed file');
+      }
+    } catch (err) {
+      throw new Error('Malformed file');
+    }
 
     const index = {};
-    const allContent = InvertedIndex.tokenize(InvertedIndex.flattenContent(fileContent));
+    const allContent = InvertedIndex
+      .tokenize(InvertedIndex.flattenContent(fileContent));
     let eachContent;
 
-    fileContent.forEach((book, i) => {
+    fileContent.forEach((book, location) => {
       eachContent = book;
-      eachContent = new Set(InvertedIndex.tokenize(`${eachContent.title} ${eachContent.text}`));
+      eachContent = new Set(InvertedIndex
+        .tokenize(`${eachContent.title} ${eachContent.text}`));
 
       allContent.forEach((word) => {
         if (eachContent.has(word)) {
-          if (word in index) index[word].push(i);
-          else index[word] = [i];
+          if (word in index) index[word].push(location);
+          else index[word] = [location];
         }
       });
     });
@@ -90,29 +104,38 @@ class InvertedIndex {
 
   /**
    * Searches the already created index
+   * @param {object} indices - indices to be search
    * @param {string} fileName - name of the file to be searched
    * @param {string|array} terms - search terms
    * @returns {object} - contains the location of each terms
    */
-  searchIndex(fileName = 'all', ...terms) {
-    const indices = this.indices;
-    const searchTerms = [];
+  static searchIndex(indices, ...terms) {
+    let searchTerms = [];
     const result = {};
+    const keys = Object.keys(indices);
 
     terms.forEach((term) => {
-      if (Array.isArray(term)) searchTerms.push(...term);
-      if (typeof term === 'string') searchTerms.push(...term.split(' '));
+      if (Array.isArray(term)) {
+        searchTerms.push(...term);
+      }
+      if (typeof term === 'string') {
+        searchTerms.push(...InvertedIndex.tokenize(term));
+      }
     });
 
-    /**
-     * Creates a property in result for each book
-     * Initializes it to an empty object
-     */
-    Object.keys(indices).forEach((index) => {
+    keys.forEach((index) => {
       result[index] = {};
     });
 
-    Object.keys(indices).forEach((index) => {
+    let fileName;
+    if (searchTerms[1] === 'json') {
+      fileName = `${searchTerms[0]}.json`;
+      searchTerms = searchTerms.slice(2);
+    } else {
+      fileName = 'all';
+    }
+
+    keys.forEach((index) => {
       searchTerms.forEach((word) => {
         if (word in indices[index]) {
           result[index][word] = indices[index][word];
@@ -122,6 +145,10 @@ class InvertedIndex {
       });
     });
 
+    if (!(fileName in indices) && fileName !== 'all') {
+      return `${fileName} not in index`;
+    }
+
     if (fileName === 'all') {
       return result;
     }
@@ -129,4 +156,4 @@ class InvertedIndex {
   }
 }
 
-module.exports = InvertedIndex;
+export default InvertedIndex;
